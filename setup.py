@@ -8,8 +8,8 @@ setup(
   description = 'A simple package for applying Nelson Rules to control chart data',   # Give a short description about your library
   author = 'Jordan Hyatt',                   # Type in your name
   author_email = 'jordan.t.hyatt@gmail.com',      # Type in your E-Mail
-  url = 'https://github.com/user/reponame',   # Provide either the link to your github or to your website
-  download_url = 'https://github.com/user/reponame/archive/v_01.tar.gz',    # I explain this later on
+  url = 'https://github.com/JordanHyatt/nelson_check',   # Provide either the link to your github or to your website
+  download_url = 'https://github.com/JordanHyatt/nelson_check/archive/V_0.1.tar.gz',    # I explain this later on
   keywords = ['SPC', 'Nelson Rules'],   # Keywords that define your package best
   install_requires=[            # I get to this in a second
           'pandas',
