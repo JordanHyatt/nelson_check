@@ -50,6 +50,7 @@ for nv in nc.violations:
 output:
 ```
 Nelson Rule 2
+Nine or more points in a row are on the same side of the mean
 34    10.531433
 35    10.481213
 36    10.893916
@@ -62,6 +63,8 @@ Nelson Rule 2
 Name: ser, dtype: float64
 ************
 Nelson Rule 6
+Four or five out of five points in a row are more than 1 standard deviation from 
+the mean in the same direction
 93    10.115869
 94    10.932090
 95    10.595130
