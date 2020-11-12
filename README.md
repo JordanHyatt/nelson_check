@@ -43,6 +43,7 @@ rule
 ```python
 for nv in nc.violations:
   print (nv.rule)
+  print (nv.rule.desc)
   print(nv.offenders)
   print('************')
 ```
