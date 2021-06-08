@@ -14,8 +14,9 @@ $ pip install NelsonCheck
 Instances of the NelsonRule class give the description of the rule\
 note: num parameter must be an integer 1-8
 ```python 
-  nr1 = NelsonRule(num=1)
-  nr5 = NelsonRule(num=2)
+  from NelsonCheck import NelsonCheck as NC
+  nr1 = NC.NelsonRule(num=1)
+  nr5 = NC.NelsonRule(num=2)
   print(nr1,nr1.desc)
   print(nr5,nr5.desc)
 ```
