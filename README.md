@@ -39,7 +39,7 @@ The instance created will have an attribute called *violations*
 which is a list of NelsonViolation objects.  Each NelsonViolation object will
 have an attribute *rule* which will be a NelsonRule instance and an attribute 
 *offenders* which will be a pandas series of the data points that violated the 
-rule
+rule.  The index is preserved from the data that was originally passed.
 
 ```python
 for nv in nc.violations:
