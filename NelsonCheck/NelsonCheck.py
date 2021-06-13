@@ -135,47 +135,67 @@ class NelsonCheck:
     def check_rule4(self):
         rule = NelsonRule(4)
         df = DF()
-        df['ser'] = self.data
-        df['above'] = (self.data - self.data.shift())>0
-        df['grouping'] = (df['above'] != df['above'].shift()).cumsum()
-        group_counts = df.groupby('grouping')['above'].count()
-        offending_groups = group_counts[group_counts >= 6]
+        data = self.data
+        df['ser'] = data
+        df['next'] = data.shift(-1)
+        df['dif'] = df['ser'] - df['next']
+        def get_label(val):
+            if val>0:
+                return 'up'
+            elif val==0:
+                return 'same'
+            else:
+                return 'down'
+        df['label'] = df.dif.apply(get_label)
+        df['nlabel'] = df['label'].shift(-1)
+        def get_same_dir(ser):
+            m1 = ser.label != ser.nlabel
+            m2 = ser.label != 'same'
+            m3 = ser.nlabel != 'same'
+            if m1 and m2 and m3:
+                return False
+            else:
+                return True
+        df['same_dir']=df.apply(get_same_dir,axis=1)
+        df['grouping'] = df.same_dir.cumsum()
+        group_counts = df.groupby('grouping')['dif'].count()
+        offending_groups = group_counts[group_counts >= 14]
         _r4_offenders = df[df['grouping'].isin(offending_groups.index)]['ser']
-        return self.process_offenders(rule,_r4_offenders)    
+        return self.process_offenders(rule,_r4_offenders)   
     
     def check_rule5(self):
         rule = NelsonRule(5)
         df = DF()
         df['ser'] = self.data
-        df['ulim']=(self.CL + 2*(self.UCL-self.CL)/3)
-        df['llim']=(self.CL - 2*(self.CL-self.LCL)/3)
-        df['high']=df['ser']>df['ulim'] 
-        df['low']=df['ser']<df['llim']
-        df['high_grouping'] = (df['high'] == df['high'].shift()).cumsum()
-        df['low_grouping'] = (df['low'] == df['low'].shift()).cumsum()
-        high_group_counts = df.groupby('high_grouping')['high'].count()
-        low_group_counts = df.groupby('low_grouping')['low'].count()
+        ulim=(self.CL + 2*(self.UCL-self.CL)/3)
+        llim=(self.CL - 2*(self.CL-self.LCL)/3)
+        df['high']=df['ser']>ulim
+        df['low']=df['ser']<llim
+        df['high_grouping'] = (~df['high']).cumsum()
+        df['low_grouping'] = (~df['low']).cumsum()
+        high_group_counts = df[df['high']==True].groupby('high_grouping')['high'].count()
+        low_group_counts = df[df['low']==True].groupby('low_grouping')['low'].count()
         high_offending_groups = high_group_counts[high_group_counts >= 2]
-        low_offending_groups = high_group_counts[high_group_counts >= 2]
+        low_offending_groups = low_group_counts[low_group_counts >= 2]
         mask1 = df['high_grouping'].isin(high_offending_groups.index)
         mask2 = df['low_grouping'].isin(low_offending_groups.index)
         _r5_offenders = df[mask1|mask2]['ser']
-        return self.process_offenders(rule,_r5_offenders)    
+        return self.process_offenders(rule,_r5_offenders)     
 
     def check_rule6(self):
         rule = NelsonRule(6)
         df = DF()
         df['ser'] = self.data
-        df['ulim']=(self.CL + 1*(self.UCL-self.CL)/3)
-        df['llim']=(self.CL - 1*(self.CL-self.LCL)/3)
-        df['high']=df['ser']>df['ulim'] 
-        df['low']=df['ser']<df['llim']
-        df['high_grouping'] = (df['high'] == df['high'].shift()).cumsum()
-        df['low_grouping'] = (df['low'] == df['low'].shift()).cumsum()
-        high_group_counts = df.groupby('high_grouping')['high'].count()
-        low_group_counts = df.groupby('low_grouping')['low'].count()
+        ulim=(self.CL + 1*(self.UCL-self.CL)/3)
+        llim=(self.CL - 1*(self.CL-self.LCL)/3)
+        df['high']=df['ser']>ulim
+        df['low']=df['ser']<llim
+        df['high_grouping'] = (~df['high']).cumsum()
+        df['low_grouping'] = (~df['low']).cumsum()
+        high_group_counts = df[df['high']==True].groupby('high_grouping')['high'].count()
+        low_group_counts = df[df['low']==True].groupby('low_grouping')['low'].count()
         high_offending_groups = high_group_counts[high_group_counts >= 4]
-        low_offending_groups = high_group_counts[high_group_counts >= 4]
+        low_offending_groups = low_group_counts[low_group_counts >= 4]
         mask1 = df['high_grouping'].isin(high_offending_groups.index)
         mask2 = df['low_grouping'].isin(low_offending_groups.index)
         _r6_offenders = df[mask1|mask2]['ser']
@@ -206,6 +226,7 @@ class NelsonCheck:
         mask2 = df['ser']>df['ulim']    
         df['outside']=mask1|mask2
         df['grouping']=(df['outside'] != df['outside'].shift()).cumsum()
+        print(df)
         group_counts = df.groupby('grouping')['outside'].sum()
         offending_groups = group_counts[group_counts >= 8]
         _r8_offenders = df[df['grouping'].isin(offending_groups.index)]['ser']

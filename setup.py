@@ -3,7 +3,7 @@ from distutils.core import setup
 setup(
   name = 'NelsonCheck',         # How you named your package folder (MyLib)
   packages = ['NelsonCheck'],   # Chose the same as "name"
-  version = '0.1',      # Start with a small number and increase it with every change you make
+  version = '0.2',      # Start with a small number and increase it with every change you make
   license='MIT',        # Chose a license from here: https://help.github.com/articles/licensing-a-repository
   description = 'A simple package for applying Nelson Rules to control chart data',   # Give a short description about your library
   author = 'Jordan Hyatt',                   # Type in your name
