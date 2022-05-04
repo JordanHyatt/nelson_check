@@ -226,7 +226,6 @@ class NelsonCheck:
         mask2 = df['ser']>df['ulim']    
         df['outside']=mask1|mask2
         df['grouping']=(df['outside'] != df['outside'].shift()).cumsum()
-        print(df)
         group_counts = df.groupby('grouping')['outside'].sum()
         offending_groups = group_counts[group_counts >= 8]
         _r8_offenders = df[df['grouping'].isin(offending_groups.index)]['ser']
