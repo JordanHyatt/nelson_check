@@ -105,10 +105,12 @@ class NelsonCheck:
         
     
     def check_rule1(self):
-        rule = NelsonRule(1)
+        ''' Method to check for and process Rule1 violations'''
+        rule = NelsonRule(1) # Pull rule1 object for processing
+        # Create masks for data points above and below UCL and LCL
         mask1 = self.data<self.LCL
         mask2 = self.data>self.UCL
-        
+        # Filter the data to only contain those points in violation and process
         _r1_offenders = self.data[mask1|mask2]
         return self.process_offenders(rule,_r1_offenders)
 
@@ -169,43 +171,61 @@ class NelsonCheck:
         rule = NelsonRule(5)
         df = DF()
         df['ser'] = self.data
+        df['position'] = [i for i in range(len(df))]
         ulim=(self.CL + 2*(self.UCL-self.CL)/3)
         llim=(self.CL - 2*(self.CL-self.LCL)/3)
         df['high']=df['ser']>ulim
         df['low']=df['ser']<llim
-        df['high_grouping'] = (~df['high']).cumsum()
-        df['low_grouping'] = (~df['low']).cumsum()
-        high_group_counts = df[df['high']==True].groupby('high_grouping')['high'].count()
-        low_group_counts = df[df['low']==True].groupby('low_grouping')['low'].count()
-        high_offending_groups = high_group_counts[high_group_counts >= 2]
-        low_offending_groups = low_group_counts[low_group_counts >= 2]
-        mask = df[df['high']==True]['high_grouping'].isin(high_offending_groups.index)
-        high_offenders = df[df['high']==True][mask]
-        mask = df[df['low']==True]['low_grouping'].isin(low_offending_groups.index)
-        low_offenders = df[df['low']==True][mask]
-        _r5_offenders = concat([high_offenders,low_offenders])['ser']
-        return self.process_offenders(rule,_r5_offenders)     
+        df['high_count'] = df.high.rolling(3).sum()
+        df['low_count'] = df.low.rolling(3).sum()
+        m = df.high_count >= 2
+        bad_high_positions = list(df[m].position)
+        m = df.low_count >= 2 
+        bad_low_positions = list(df[m].position)
+        all_bad_high = []
+        for pos in bad_high_positions:
+            all_bad_high += [pos, pos-1, pos-2]
+        all_bad_low = []
+        for pos in bad_low_positions:
+            all_bad_low += [pos, pos-1, pos-2]
+        m1 = df['high'] == True
+        m2= df.position.isin(all_bad_high)
+        high_offenders = df[m1&m2]['ser']
+        m1 = df['low'] == True
+        m2= df.position.isin(all_bad_low)
+        low_offenders = df[m1&m2]['ser']
+        _r5_offenders = concat([high_offenders, low_offenders])
+        return self.process_offenders(rule,_r5_offenders) 
 
     def check_rule6(self):
         rule = NelsonRule(6)
         df = DF()
         df['ser'] = self.data
+        df['position'] = [i for i in range(len(df))]
         ulim=(self.CL + 1*(self.UCL-self.CL)/3)
         llim=(self.CL - 1*(self.CL-self.LCL)/3)
         df['high']=df['ser']>ulim
         df['low']=df['ser']<llim
-        df['high_grouping'] = (~df['high']).cumsum()
-        df['low_grouping'] = (~df['low']).cumsum()
-        high_group_counts = df[df['high']==True].groupby('high_grouping')['high'].count()
-        low_group_counts = df[df['low']==True].groupby('low_grouping')['low'].count()
-        high_offending_groups = high_group_counts[high_group_counts >= 4]
-        low_offending_groups = low_group_counts[low_group_counts >= 4]
-        mask = df[df['high']==True]['high_grouping'].isin(high_offending_groups.index)
-        high_offenders = df[df['high']==True][mask]
-        mask = df[df['low']==True]['low_grouping'].isin(low_offending_groups.index)
-        low_offenders = df[df['low']==True][mask]
-        _r6_offenders = concat([high_offenders,low_offenders])['ser']
-        return self.process_offenders(rule,_r6_offenders)    
+        df['high_count'] = df.high.rolling(5).sum()
+        df['low_count'] = df.low.rolling(5).sum()
+        m = df.high_count >= 4
+        bad_high_positions = list(df[m].position)
+        m = df.low_count >= 4
+        bad_low_positions = list(df[m].position)
+        all_bad_high = []
+        for pos in bad_high_positions:
+            all_bad_high += [pos, pos-1, pos-2, pos-3, pos-4]
+        all_bad_low = []
+        for pos in bad_low_positions:
+            all_bad_low += [pos, pos-1, pos-2, pos-3, pos-4]
+        m1 = df['high'] == True
+        m2= df.position.isin(all_bad_high)
+        high_offenders = df[m1&m2]['ser']
+        m1 = df['low'] == True
+        m2= df.position.isin(all_bad_low)
+        low_offenders = df[m1&m2]['ser']
+        _r5_offenders = concat([high_offenders, low_offenders])
+        return self.process_offenders(rule,_r5_offenders) 
 
     def check_rule7(self):
         rule = NelsonRule(7)
