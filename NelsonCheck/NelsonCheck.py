@@ -1,6 +1,8 @@
 from pandas import DataFrame as DF
 from pandas import Series
+from pandas import concat
 import numpy as np
+import plotly.graph_objects as go
 
 class NelsonRule:
     RULES = {
@@ -71,10 +73,10 @@ class NelsonViolation:
         
         
 class NelsonCheck:
-    def __init__(self,data,CL=None,LCL=None,UCL=None,exclude_rules=[]):
+    def __init__(self, data, CL=None, LCL=None, UCL=None, exclude_rules=[]):
         self.violations = []#List Of Nelston Violation Objects
         self.result = True # Result after testing rules
-        self.data=Series(data); self.CL=CL; self.LCL=LCL; self.UCL=UCL
+        self.data=Series(data, name='data'); self.CL=CL; self.LCL=LCL; self.UCL=UCL
         if self.CL==None: self.CL=np.mean(self.data)
         std = np.std(self.data)
         if self.LCL==None: self.LCL=self.CL - 3*std
@@ -177,9 +179,11 @@ class NelsonCheck:
         low_group_counts = df[df['low']==True].groupby('low_grouping')['low'].count()
         high_offending_groups = high_group_counts[high_group_counts >= 2]
         low_offending_groups = low_group_counts[low_group_counts >= 2]
-        mask1 = df['high_grouping'].isin(high_offending_groups.index)
-        mask2 = df['low_grouping'].isin(low_offending_groups.index)
-        _r5_offenders = df[mask1|mask2]['ser']
+        mask = df[df['high']==True]['high_grouping'].isin(high_offending_groups.index)
+        high_offenders = df[df['high']==True][mask]
+        mask = df[df['low']==True]['low_grouping'].isin(low_offending_groups.index)
+        low_offenders = df[df['low']==True][mask]
+        _r5_offenders = concat([high_offenders,low_offenders])['ser']
         return self.process_offenders(rule,_r5_offenders)     
 
     def check_rule6(self):
@@ -196,9 +200,11 @@ class NelsonCheck:
         low_group_counts = df[df['low']==True].groupby('low_grouping')['low'].count()
         high_offending_groups = high_group_counts[high_group_counts >= 4]
         low_offending_groups = low_group_counts[low_group_counts >= 4]
-        mask1 = df['high_grouping'].isin(high_offending_groups.index)
-        mask2 = df['low_grouping'].isin(low_offending_groups.index)
-        _r6_offenders = df[mask1|mask2]['ser']
+        mask = df[df['high']==True]['high_grouping'].isin(high_offending_groups.index)
+        high_offenders = df[df['high']==True][mask]
+        mask = df[df['low']==True]['low_grouping'].isin(low_offending_groups.index)
+        low_offenders = df[df['low']==True][mask]
+        _r6_offenders = concat([high_offenders,low_offenders])['ser']
         return self.process_offenders(rule,_r6_offenders)    
 
     def check_rule7(self):
@@ -231,11 +237,21 @@ class NelsonCheck:
         _r8_offenders = df[df['grouping'].isin(offending_groups.index)]['ser']
         return self.process_offenders(rule,_r8_offenders)   
         
-        
-        
-        
-        
-        
+    def plot(self):
+        ''' Method generates and returns a plotly figure of the data + violations '''
+        df = DF(self.data)
+        df['UCL'] = self.UCL
+        df['LCL'] = self.LCL
+        df['CL'] = self.CL
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=df.index, y=df.data, name='data', mode='markers'))
+        fig.add_trace(go.Scatter(x=df.index, y=df.LCL, name='LCL', marker_color='orange'))
+        fig.add_trace(go.Scatter(x=df.index, y=df.CL, name='CL', marker_color='tan'))
+        fig.add_trace(go.Scatter(x=df.index, y=df.UCL, name='UCL', marker_color='orange'))
+        for vio in self.violations:
+            fig.add_trace(go.Scatter(x=vio.offenders.index, y=vio.offenders.values, name=str(vio.rule), marker_color='red', mode='markers'))    
+        return fig
+
         
         
         
