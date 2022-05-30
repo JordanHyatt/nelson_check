@@ -162,12 +162,12 @@ class NelsonCheck:
             else:
                 return True
         df['same_dir']=df.apply(get_same_dir,axis=1)
-        df['rsum'] = df['same_dir'].rolling(14).sum()
+        df['rsum'] = df['same_dir'].rolling(12).sum()
 
         bad_positions = list(df[df.rsum==0].position)
         all_bad_positions = []
         for pos in bad_positions:
-            all_bad_positions += [pos-i for i in range(14)]
+            all_bad_positions += [pos-i for i in range(-1,13)]
         _r4_offenders = df[df.position.isin(all_bad_positions)]['ser']
         return self.process_offenders(rule,_r4_offenders)   
     
