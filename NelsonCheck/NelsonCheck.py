@@ -110,7 +110,7 @@ class NelsonCheck:
         # Create masks for data points above and below UCL and LCL
         mask1 = self.data<self.LCL
         mask2 = self.data>self.UCL
-        # Filter the data to only contain those points in violation and process
+        # Filter the data to only contain those points in violation 
         _r1_offenders = self.data[mask1|mask2]
         return self.process_offenders(rule,_r1_offenders)
 
@@ -141,8 +141,9 @@ class NelsonCheck:
         df = DF()
         data = self.data
         df['ser'] = data
-        df['next'] = data.shift(-1)
-        df['dif'] = df['ser'] - df['next']
+        df['position'] = [i for i in range(len(df))]
+        df['prev'] = data.shift(1)
+        df['dif'] = df['ser'] - df['prev']
         def get_label(val):
             if val>0:
                 return 'up'
@@ -161,10 +162,13 @@ class NelsonCheck:
             else:
                 return True
         df['same_dir']=df.apply(get_same_dir,axis=1)
-        df['grouping'] = df.same_dir.cumsum()
-        group_counts = df.groupby('grouping')['dif'].count()
-        offending_groups = group_counts[group_counts >= 14]
-        _r4_offenders = df[df['grouping'].isin(offending_groups.index)]['ser']
+        df['rsum'] = df['same_dir'].rolling(14).sum()
+
+        bad_positions = list(df[df.rsum==0].position)
+        all_bad_positions = []
+        for pos in bad_positions:
+            all_bad_positions += [pos-i for i in range(14)]
+        _r4_offenders = df[df.position.isin(all_bad_positions)]['ser']
         return self.process_offenders(rule,_r4_offenders)   
     
     def check_rule5(self):
@@ -226,6 +230,7 @@ class NelsonCheck:
         low_offenders = df[m1&m2]['ser']
         _r5_offenders = concat([high_offenders, low_offenders])
         return self.process_offenders(rule,_r5_offenders) 
+
 
     def check_rule7(self):
         rule = NelsonRule(7)

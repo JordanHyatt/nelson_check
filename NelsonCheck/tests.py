@@ -2,28 +2,22 @@ import unittest
 import NelsonCheck as NC
 import numpy, random
 
-def get_random_mean():
-    return numpy.mean([random.gauss(0,-2) for i in range(10)])
-
-def get_random_mean_set(size):
-    return [get_random_mean() for i in range(size)]
+def get_gauss_data(mu=0, sigma=1, size=15):
+    return [random.gauss(mu,sigma) for i in range(size)]
 
 class TestRuleViolations(unittest.TestCase):
     nrd = {}
     for i in range(1,9):
         nrd[f'nr{i}'] = NC.NelsonRule(i)
-    
     def test_rule1(self):
         rule_num=1
         data = [1,2,3,2,4,1,2,3,2,1,2,5,1000]
         nc = NC.NelsonCheck(data=data)
-        print([nv.rule.num for nv in nc.violations])
         cond = rule_num in [nv.rule.num for nv in nc.violations] 
         self.assertTrue(cond)
         
         data = [1,2,3,2,4,1,2,3,2,1,2,5]
         nc = NC.NelsonCheck(data=data)
-        print([nv.rule.num for nv in nc.violations])
         cond = rule_num in [nv.rule.num for nv in nc.violations] 
         self.assertFalse(cond)
         
@@ -35,17 +29,15 @@ class TestRuleViolations(unittest.TestCase):
         ]
         for data in bdatas:
             nc = NC.NelsonCheck(data=data)
-            print([nv.rule.num for nv in nc.violations])
             cond = rule_num in [nv.rule.num for nv in nc.violations] 
             self.assertTrue(cond)
         gdatas = [
             [1,2,3,2,4,1,2,3,2,1,2,5,4],
             [1,2,3,2,4,1,2,3,2,1,2,5,4],
-            get_random_mean_set(100)
+            get_gauss_data(15)
         ]
         for data in gdatas:
             nc = NC.NelsonCheck(data=data)
-            print([nv.rule.num for nv in nc.violations])
             cond = rule_num in [nv.rule.num for nv in nc.violations] 
             self.assertFalse(cond)    
               
@@ -57,17 +49,15 @@ class TestRuleViolations(unittest.TestCase):
         ]
         for data in bdatas:
             nc = NC.NelsonCheck(data=data)
-            print([nv.rule.num for nv in nc.violations])
             cond = rule_num in [nv.rule.num for nv in nc.violations] 
             self.assertTrue(cond)
         gdatas = [
             [1,2,3,2,4,1,2,3,2,1,2,5,4],
             [1,2,3,2,4,1,2,3,2,1,2,5,4],
-            get_random_mean_set(100)
+            get_gauss_data(15)
         ]
         for data in gdatas:
             nc = NC.NelsonCheck(data=data)
-            print([nv.rule.num for nv in nc.violations])
             cond = rule_num in [nv.rule.num for nv in nc.violations] 
             self.assertFalse(cond)         
         
@@ -79,17 +69,15 @@ class TestRuleViolations(unittest.TestCase):
         ]
         for data in bdatas:
             nc = NC.NelsonCheck(data=data)
-            print([nv.rule.num for nv in nc.violations])
             cond = rule_num in [nv.rule.num for nv in nc.violations] 
             self.assertTrue(cond)
         gdatas = [
             [1,2,1,2,1,2,1,1,1,2,1,2,1,2,1],
             [-1,2,1,2,-4,-45,1,2,1,2,1,2,3,2,-2,5,1,89],
-            get_random_mean_set(100)
+            get_gauss_data(15)
         ]
         for data in gdatas:
             nc = NC.NelsonCheck(data=data)
-            print([nv.rule.num for nv in nc.violations])
             cond = rule_num in [nv.rule.num for nv in nc.violations] 
             self.assertFalse(cond)            
             
@@ -101,17 +89,15 @@ class TestRuleViolations(unittest.TestCase):
         ]
         for data in bdatas:
             nc = NC.NelsonCheck(data=data)
-            print([nv.rule.num for nv in nc.violations])
             cond = rule_num in [nv.rule.num for nv in nc.violations] 
             self.assertTrue(cond)
         gdatas = [
             [1,2,1,2,1,2,1,1,1,2,1,2,1,2,1,200],
             [-1,2,1,2,-4,1,2,1,2,1,2,3,2,-2,5,1,-200],
-            get_random_mean_set(100)
+            get_gauss_data(15)
         ]
         for data in gdatas:
             nc = NC.NelsonCheck(data=data)
-            print([nv.rule.num for nv in nc.violations])
             cond = rule_num in [nv.rule.num for nv in nc.violations] 
             self.assertFalse(cond)                  
             
@@ -123,20 +109,18 @@ class TestRuleViolations(unittest.TestCase):
         ]
         for data in bdatas:
             nc = NC.NelsonCheck(data=data)
-            print([nv.rule.num for nv in nc.violations])
             cond = rule_num in [nv.rule.num for nv in nc.violations] 
             self.assertTrue(cond)
         gdatas = [
             #[1,2,1,2,1,2,1,1,1,2,1,2,1,2,1,20,20,20],
             #[-1,2,1,2,-4,1,2,1,2,1,2,3,2,-2,2,1,-20,-20,-20],
-            get_random_mean_set(100)
+            get_gauss_data(15)
         ]
         for data in gdatas:
             nc = NC.NelsonCheck(data=data)
-            print([nv.rule.num for nv in nc.violations])
             cond = rule_num in [nv.rule.num for nv in nc.violations] 
-            self.assertFalse(cond)                
-               
+            self.assertFalse(cond)
+                               
             
     def test_rule7(self):
         rule_num=7
@@ -145,15 +129,13 @@ class TestRuleViolations(unittest.TestCase):
         ]
         for data in bdatas:
             nc = NC.NelsonCheck(data=data)
-            print([nv.rule.num for nv in nc.violations])
             cond = rule_num in [nv.rule.num for nv in nc.violations] 
             self.assertTrue(cond)
         gdatas = [
-            get_random_mean_set(100)
+            get_gauss_data(15)
         ]
         for data in gdatas:
             nc = NC.NelsonCheck(data=data)
-            print([nv.rule.num for nv in nc.violations])
             cond = rule_num in [nv.rule.num for nv in nc.violations] 
             self.assertFalse(cond)               
             
@@ -165,15 +147,13 @@ class TestRuleViolations(unittest.TestCase):
         ]
         for data in bdatas:
             nc = NC.NelsonCheck(data=data,UCL=4,LCL=6)
-            print([nv.rule.num for nv in nc.violations])
             cond = rule_num in [nv.rule.num for nv in nc.violations] 
             self.assertTrue(cond)
         gdatas = [
-            get_random_mean_set(100)
+            get_gauss_data(15)
         ]
         for data in gdatas:
             nc = NC.NelsonCheck(data=data)
-            print([nv.rule.num for nv in nc.violations])
             cond = rule_num in [nv.rule.num for nv in nc.violations] 
             self.assertFalse(cond)   
                         
